@@ -18,29 +18,33 @@ on:
         default: frontend
 
 jobs:
-  cf-pages:
-    name: CloudFlare Pages 📃
+  github-pages:
+    name: GitHub Pages 📃
     runs-on: ubuntu-latest
     environment: 
       name: ${{ inputs.branch == 'master' && 'Production' || 'Preview' }}
-      url: ${{ steps.cf.outputs.deployment-url }}
+      url: ${{ steps.pages.outputs.page_url }}
     outputs:
-      url: ${{ steps.cf.outputs.deployment-url }}
+      url: ${{ steps.pages.outputs.page_url }}
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Download workflow artifact ⬇️
-        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        uses: actions/download-artifact@v2
         with:
           name: ${{ inputs.artifact_name }}
           path: dist
 
-      - name: Publish to Cloudflare Pages 📃
-        uses: cloudflare/wrangler-action@b2a0191ce60d21388e1a8dcc968b4e9966f938e1 # v3.11.0
-        id: cf
+      - name: Deploy to GitHub Pages 📃
+        id: pages
+        uses: actions/deploy-pages@v1
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=jellyfin-web --branch=${{ inputs.branch }}
+          branch: ${{ inputs.branch }}
+          folder: dist
 
   compose-comment:
     name: Compose and push comment 📝
@@ -49,11 +53,11 @@ jobs:
     uses: ./.github/workflows/__job_messages.yml
     secrets: inherit
     needs:
-      - cf-pages
+      - github-pages
 
     with:
       branch: ${{ inputs.branch }}
       commit: ${{ inputs.commit }}
-      preview_url: ${{ needs.cf-pages.outputs.url }}
+      preview_url: ${{ needs.github-pages.outputs.url }}
       in_progress: false
       comment: ${{ inputs.comment }}
