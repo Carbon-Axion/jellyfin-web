@@ -25,14 +25,7 @@ jobs:
     with:
       commit: ${{ github.sha }}
 
-  quality_checks:
-    name: Quality checks 👌🧪
-    if: ${{ always() && !cancelled() }}
-    uses: ./.github/workflows/__quality_checks.yml
-    permissions: {}
-    with:
-      commit: ${{ github.sha }}
-
+  
   codeql:
     name: GitHub CodeQL 🔬
     uses: ./.github/workflows/__codeql.yml
@@ -45,7 +38,7 @@ jobs:
 
   deploy:
     name: Deploy 🚀
-    if: ${{ github.repository == 'jellyfin/jellyfin-web' }}
+    if: ${{ github.repository == 'Carbon-Axion/jellyfin-web' }}
     uses: ./.github/workflows/__deploy.yml
     needs:
       - main
