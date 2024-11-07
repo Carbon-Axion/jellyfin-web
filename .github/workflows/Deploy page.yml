@@ -8,13 +8,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Build static files
-        run: npm install && npm run build
+        run: npm run build
 
       - name: Upload artifacts
         uses: actions/upload-pages-artifact@v1
